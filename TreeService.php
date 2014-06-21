@@ -11,10 +11,10 @@ class TreeService {
         $nodes = $this->repository->getTree($parentId);
         foreach($nodes as $node) {
             $childs = [];
-            if ($node->type == "branche" && in_array($node->id, $expandedBranches)) {
+            if ($node->type == "branch" && true/** in_array($node->id, $expandedBranches)*/) {
                 $childs = $this->getTree($expandedBranches, $node->id, $level + 1);
             }
-            $tree[] = new TreeDomain($node->id, $node->name, $node->type, $node->parentId, in_array($node->id, $expandedBranches), $childs, $level);
+            $tree[] = new TreeDomain($node->id, $node->name, $node->type, $node->parentId, true/** in_array($node->id, $expandedBranches)*/, $childs, $level);
         }
         return $tree;
     }

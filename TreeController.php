@@ -8,12 +8,13 @@ class TreeController {
 
     public function getTree($expandedBranches) {
         $tree = $this->service->getTree($expandedBranches);
+        // добавим все в корневую папку 
+        $tree = [new TreeDomain(0, "home", "branch", -1, "expanded", $tree , 0)];
         include "treeLayoutTemplate.php";
     }
     
     public function replaceNode($nodeId, $parentId) {
-        if ((!isset($nodeId) && intval($nodeId) == 0) 
-                || (!isset($parentId) && intval($parentId) == 0) ) {
+        if ((!isset($nodeId) && intval($nodeId) == 0)) {
             //throw new BadRequestException("Не правильно переданы параметры.");
             return;
         }

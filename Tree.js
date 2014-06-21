@@ -1,4 +1,4 @@
-define("Tree", ["jquery"], function($) {
+define("Tree", ["jquery", "jqueryUi"], function($) {
     var JQUERY_PLUGIN_NAME = "tree";
     
     function Tree() {
@@ -13,19 +13,71 @@ define("Tree", ["jquery"], function($) {
                 selectors: {
                     treeNode: ".tree-node"
                     , treeNodeInner: ".tree-node-inner"
-                    , treeNodeImgBranch: ".tree-node-img-branche"
+                    , treeNodeImgBranch: ".tree-node-img-branch"
+                    , treeNodeImgEmpty: ".tree-node-img-empty"
                 }
                 , classes: {
-                    treeNodeImgLoading: ".tree-node-img-loading"
-                    , treeNodeImgEmpty: ".tree-node-img-empty"
+                    treeNodeImgLoading: "tree-node-img-loading"
                 }
                 , templates: {
                     treeNodeImgEmpty: "<span class=\"tree-node-img tree-node-img-empty\"></span>"
+                    , treeDropHelper: 
+                        "<div class=\"tree-node-inner\">"+
+                            "<span class=\"tree-node-img tree-node-img-drop-no\"></span>"+
+                            "<span class=\"tree-node-name\"></span>"+
+                        "</div>"
+                            
                 }
-            }                
+            }
+            , currentDraggedNodeId: 0
+            , currentTargetNodeId: 0
+            , currentDraggedHelper: $()
         }
         , init: function(options) {
-            $.extend(true, this, this.defaults);            
+            $.extend(true, this, this.defaults, options);            
+            this.setTreeEvents();
+        }
+        , setTreeEvents: function() {
+            var treeObj = this;
+            $(this.helpers.selectors.treeNode)
+                .draggable({
+                    revert: true
+                    , helper: function(event) {
+                        var $helperElem = $(treeObj.helpers.templates.treeDropHelper);
+                        $helperElem.find(".tree-node-name").text(this.getAttribute("data-name"))
+                        treeObj.currentDraggedHelper = $helperElem;
+                        return $helperElem.get(0);
+                    }
+                    , start: function(event) {
+                        treeObj.currentDraggedNodeId = this.getAttribute("data-id");
+                    }
+                    , stop: function(event) {
+                        treeObj.currentDraggedNodeId = 0;
+                    }
+                })
+                .droppable({
+                    drop: function() {
+                        treeObj.currentDraggedHelper.remove()
+                        treeObj.currentDraggedHelper = $();
+                        treeObj.replaceNodeIfOnlyNeed(treeObj.currentDraggedNodeId, treeObj.currentTargetNodeId);
+                    }
+                })
+                .on("mouseover", function(event) {
+                    treeObj.currentTargetNodeId = this.getAttribute("data-id");
+                    if (treeObj.currentDraggedNodeId > 0) {
+                        if (treeObj.checkDrop(treeObj.currentDraggedNodeId, treeObj.currentTargetNodeId)) {
+                            treeObj.currentDraggedHelper.find(".tree-node-img").removeClass("tree-node-img-drop-no").addClass("tree-node-img-drop-yes");
+                        } else {
+                            treeObj.currentDraggedHelper.find(".tree-node-img").removeClass("tree-node-img-drop-yes").addClass("tree-node-img-drop-no");
+                        }
+                    }
+                });
+            
+            this.element
+                .on("mouseleave", function(event) {
+                    treeObj.currentTargetNodeId = 0;
+                    treeObj.currentDraggedHelper.find(".tree-node-img").removeClass("tree-node-img-drop-yes").addClass("tree-node-img-drop-no");
+                });
         }
         , descendantChilds: function(nodeId) {
             var $childsElem = this.element.find(this.helpers.selectors.treeNode +"[data-parent-id='" + nodeId + "']");
@@ -35,7 +87,7 @@ define("Tree", ["jquery"], function($) {
                 var $childElem = $(this);
                 var childId = $childElem.data("id");
                 childs.push(childId);
-                if ($childElem.data("type") == "branche") {
+                if ($childElem.data("type") == "branch") {
                     childs = childs.concat(treeObj.descendantChilds(childId));
                 }
             });
@@ -43,41 +95,69 @@ define("Tree", ["jquery"], function($) {
             
         }
         , descendantChildExists: function(nodeId, childId) {
-            if (this.descendantChilds(nodeId).indexOf(childId) != -1) {
+            if (this.descendantChilds(nodeId).indexOf(parseInt(childId)) != -1) {
                 return true;
             }
             return false;
         }
         , targetFolderIsChild: function(nodeId, parentId) {
-            return this.descendantChildExsists(nodeId, parentId);
+            return this.descendantChildExists(nodeId, parentId);
         }
-        , replaceNodeIfOnlyNeed: function(nodeId, parentId) {
+        , checkDrop: function(nodeId, parentId) {
+            if (nodeId == parentId) 
+                return false;
+            
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
             var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
+            
             if ($targetFolderElem.data("type") == "leaf") {
-                return;
-            }
-            if ($targetFolderElem.data("id") == $nodeElem.data("parentId")) {
-                return;
+                var parentId = $targetFolderElem.data("parentId");
+                return this.checkDrop(nodeId, parentId);
             }
             if (this.targetFolderIsChild(nodeId, parentId)) {
-                return;
+                return false;
             }
-            this.replaceNode(nodeId, parentId);
+            return true;
+        }
+        , checkReplaceNode: function(nodeId, parentId) {
+            if (nodeId == parentId) 
+                return false;
+            
+            var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
+            var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
+            
+            if ($targetFolderElem.data("id") == $nodeElem.data("parentId")) 
+                return false;
+            if ($targetFolderElem.data("type") == "leaf") {
+                var parentId = $targetFolderElem.data("parentId");
+                return this.checkReplaceNode(nodeId, parentId);
+            }
+            if (this.targetFolderIsChild(nodeId, parentId)) {
+                return false;
+            }
+            return true;
+        }
+        , replaceNodeIfOnlyNeed: function(nodeId, parentId) {
+            if (this.checkReplaceNode(nodeId, parentId)) {
+                this.replaceNode(nodeId, parentId); 
+            }                
         }
         , replaceNode: function(nodeId, parentId) {
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
-            var $brancheImgElem = $targetFolderElem.find(this.helpers.selectors.treeNodeImgBranche);
+            var $branchImgElem = $targetFolderElem.find(this.helpers.selectors.treeNodeImgBranch);
             var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
             
+            $branchImgElem.addClass(this.helpers.classes.treeNodeImgLoading);
+            
             this.replaceNodeElem(nodeId, parentId);
+            
             var treeObj = this;
             $.ajax({
                 url: this.baseUrl + "replaceNode.php"
                 , data: {nodeId: nodeId, parentId: parentId}
                 , type: "POST"
                 , success: function(data) {
-                    $brancheImgElem.removeClass(treeObj.helpers.classes.treeNodeImgLoading);
+                    $branchImgElem.removeClass(treeObj.helpers.classes.treeNodeImgLoading);
                     $nodeElem.show()
                 }
                 , error: function(xhr, status) {
@@ -87,16 +167,14 @@ define("Tree", ["jquery"], function($) {
         }
         , replaceNodeElem: function(nodeId, parentId) {
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
-            var $brancheImgElem = $targetFolderElem.find(this.helpers.selectors.treeNodeImgBranche);
             var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
             
             $nodeElem.hide()
                     .insertAfter($targetFolderElem).data("parentId", $targetFolderElem.data("id"))
-                    .find(this.helpers.classes.treeNodeImgEmpty).remove();
-            
+                    .find(this.helpers.selectors.treeNodeImgEmpty).remove();
             var nodeLevel = $targetFolderElem.data("level") + 1;
             var $nodeInnerElem = $nodeElem.find(this.helpers.selectors.treeNodeInner);
-            for (var i = 1; i < nodeLevel; i++) {
+            for (var i = 0; i < nodeLevel; i++) {
                 $nodeInnerElem.prepend(this.helpers.templates.treeNodeImgEmpty);
             }
             $nodeElem.data("level", nodeLevel);
@@ -115,8 +193,9 @@ define("Tree", ["jquery"], function($) {
         this.each(function() {
             var element = $(this);
             if (!element.data(JQUERY_PLUGIN_NAME)) {
+                method = method || {};
+                method.element = element
                 element.data(JQUERY_PLUGIN_NAME, new Tree(method));
-                element.data(JQUERY_PLUGIN_NAME).element = element;
             }
             else if (element.data(JQUERY_PLUGIN_NAME)[method]) {
                 result = element.data(JQUERY_PLUGIN_NAME)[method].apply(element.data(JQUERY_PLUGIN_NAME), Array.prototype.slice.call(params, 1));

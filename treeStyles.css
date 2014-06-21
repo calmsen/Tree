@@ -44,11 +44,11 @@ html, body {
 .tree-node-img-arrow-expanded {
     background-position: -17px -3px;    
 }
-.tree-node-img-branche-collapse {   
-    background: url("tree-node-img-branche-collapse.png");    
+.tree-node-img-branch-collapse {   
+    background: url("tree-node-img-branch-collapse.png");    
 }
-.tree-node-img-branche-expanded {   
-    background: url("tree-node-img-branche-expanded.png");    
+.tree-node-img-branch-expanded {   
+    background: url("tree-node-img-branch-expanded.png");    
 }
 .tree-node-img-loading {   
     background: url("tree-node-img-loading.png");    
@@ -68,6 +68,6 @@ html, body {
     white-space: nowrap;
     text-overflow: ellipsis;
     font-size: 13px;
-    
+    z-index: 100;
 }
 
