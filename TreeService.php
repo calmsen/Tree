@@ -20,7 +20,7 @@ class TreeService {
     }
     
     public function updateTreeNode($node) {
-        $this->service->updateTreeNode($node);
+        $this->repository->updateTreeNode($node);
     }
 }
 

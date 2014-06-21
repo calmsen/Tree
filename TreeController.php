@@ -14,9 +14,14 @@ class TreeController {
     public function replaceNode($nodeId, $parentId) {
         if ((!isset($nodeId) && intval($nodeId) == 0) 
                 || (!isset($parentId) && intval($parentId) == 0) ) {
-            throw new BadRequestException("Не правильно переданы параметры.");
+            //throw new BadRequestException("Не правильно переданы параметры.");
+            return;
         }
-        $tree = $this->service->getTree($expandedBranches);
+        $node = new TreeModel();
+        $node->id = $nodeId;
+        $node->parentId = $parentId;
+        
+        $tree = $this->service->updateTreeNode($node);
     }
 }
 ?>

@@ -12,7 +12,7 @@ class TreeRepository {
     }
     
     public function updateTreeNode($node) {
-        $stmt = $this->dbh->query("UPDATE tree SET name = " . $node->id . ", parentId = " . $node->parentId . ";");
+        $stmt = $this->dbh->query("UPDATE tree SET parentId = " . $node->parentId . " WHERE id = " . $node->id . ";");
     }
 }
 

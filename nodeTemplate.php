@@ -1,8 +1,8 @@
 <tr class="tree-node tree-node-<?php echo $node->type;?> tree-node-<?php echo ($node->expanded ? "expanded" : "collapse");?>"
-    data-id="<?php echo $node->id;?>" data-type="<?php echo $node->type;?>">
-    <td class="tree-node-inner tree-node-inner-<?php echo $node->type;?>">
+    data-id="<?php echo $node->id;?>" data-type="<?php echo $node->type;?>" data-level="<?php echo $node->level;?>" data-parent-id="<?php echo $node->parentId;?>"
+>    <td class="tree-node-inner tree-node-inner-<?php echo $node->type;?>">
         <?php
-        for ($i = 0; $i < $node->level; $i++) {
+        for ($i = 1; $i < $node->level; $i++) {
             ?>
             <span class="tree-node-img tree-node-img-empty"></span>
             <?php

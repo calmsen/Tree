@@ -11,6 +11,6 @@ $repository = new TreeRepository(Env::$DBH);
 $service = new TreeService($repository);
 $controller = new TreeController($service);
 
-$controller->replaceNode($nodeId, $parentId);
+$controller->replaceNode($_POST["nodeId"], $_POST["parentId"]);
 
 ?>
