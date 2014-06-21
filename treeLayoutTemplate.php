@@ -7,7 +7,7 @@
         <script type="text/javascript" src="require-2.1.14.min.js"></script>
         <script type="text/javascript" src="main.js"></script>
     </head>
-    <body><img class=" x-tree-elbow-img x-tree-elbow-end-plus x-tree-expander" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==">
+    <body>
         <table class="tree">
         <?php
         foreach ($tree as $node) {

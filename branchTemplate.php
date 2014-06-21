@@ -1,4 +1,4 @@
-<tr class="tree-node tree-node-<?php echo $node->type;?> tree-node-<?php echo ($node->expended ? "expended" : "collapse");?>">
+<tr class="tree-node tree-node-<?php echo $node->type;?> tree-node-<?php echo ($node->expanded ? "expanded" : "collapse");?>">
     <div class="tree-node-inner tree-node-inner-<?php echo $node->type;?>">
         <?php
         while ($node->level - 1) {
@@ -11,8 +11,8 @@
         <?php
         if ($node->type == "branch") {
             ?>
-            <img src="tree-node-img-arrow-<?php echo ($node->expended ? "expended" : "collapse");?>.png" class="tree-node-img-arrow tree-node-img-arrow-<?php echo ($node->expended ? "expended" : "collapse");?>" />
-            <img src="tree-node-img-branch-<?php echo ($node->expended ? "expended" : "collapse");?>.png" class="tree-node-img-branch tree-node-img-branch-<?php echo ($node->expended ? "expended" : "collapse");?>"/>
+            <img src="tree-node-img-arrow-<?php echo ($node->expanded ? "expanded" : "collapse");?>.png" class="tree-node-img-arrow tree-node-img-arrow-<?php echo ($node->expanded ? "expanded" : "collapse");?>" />
+            <img src="tree-node-img-branch-<?php echo ($node->expanded ? "expanded" : "collapse");?>.png" class="tree-node-img-branch tree-node-img-branch-<?php echo ($node->expanded ? "expanded" : "collapse");?>"/>
             <?php
         } else {
             ?>

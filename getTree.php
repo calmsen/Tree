@@ -10,11 +10,11 @@ include "TreeDomain.php";
 $repository = new TreeRepository(Env::$DBH);
 $service = new TreeService($repository);
 $controller = new TreeController($service);
-if ($_SERVER["REQUEST_URI"] == "/Tree/tree")  {
-    $expandedBranches = [];
-    if (!isset($_GET["expandedBranches"])) {
-        $expandedBranches = $_GET["expandedBranches"];
-    }
-    $controller->getTree($expandedBranches);
+
+$expandedBranches = [];
+if (isset($_GET["expandedBranches"])) {
+    $expandedBranches = $_GET["expandedBranches"];
 }
+$controller->getTree($expandedBranches);
+
 ?>
