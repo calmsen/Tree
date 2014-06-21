@@ -42,8 +42,7 @@ define("Tree", ["jquery"], function($) {
             return childs;
             
         }
-        , descendantChildExsists: function(nodeId, childId) {
-            console.log(this.descendantChilds(nodeId));
+        , descendantChildExists: function(nodeId, childId) {
             if (this.descendantChilds(nodeId).indexOf(childId) != -1) {
                 return true;
             }
@@ -66,7 +65,6 @@ define("Tree", ["jquery"], function($) {
             }
             this.replaceNode(nodeId, parentId);
         }
-        
         , replaceNode: function(nodeId, parentId) {
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
             var $brancheImgElem = $targetFolderElem.find(this.helpers.selectors.treeNodeImgBranche);
