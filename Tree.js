@@ -1,6 +1,8 @@
 define("Tree", ["jquery", "jqueryUi"], function($) {
     var JQUERY_PLUGIN_NAME = "tree";
-    
+    /**
+     * @constructor
+     */
     function Tree() {
         this.init.apply(this, arguments);
     }
@@ -8,7 +10,7 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
     $.extend(Tree.prototype, {
         defaults: {
             baseUrl: location.protocol + "//" + location.host + "/Tree/"
-            , element: $()
+            , element: $() // если вызывается через jquery плагин, то этот параметр не нужно передавать в конструктор 
             , helpers: {
                 selectors: {
                     treeNode: ".tree-node"
@@ -29,14 +31,21 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
                             
                 }
             }
-            , currentDraggedNodeId: 0
-            , currentTargetNodeId: 0
-            , currentDraggedHelper: $()
+            , currentDraggedNodeId: 0 // папка или файл которую захватили для перетаскивания
+            , currentTargetNodeId: 0  // папка в которую бросаем наш элемент(папку или файл)
+            , currentDraggedHelper: $() // элемент показывающий можно ли перетащить папку(файл)
         }
+        /**
+         * @private
+         */
         , init: function(options) {
             $.extend(true, this, this.defaults, options);            
             this.setTreeEvents();
         }
+        /**
+         * устанавливает все сбытия для дерева
+         * @private
+         */
         , setTreeEvents: function() {
             var treeObj = this;
             $(this.helpers.selectors.treeNode)
@@ -79,6 +88,12 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
                     treeObj.currentDraggedHelper.find(".tree-node-img").removeClass("tree-node-img-drop-yes").addClass("tree-node-img-drop-no");
                 });
         }
+        /**
+         * Найдем все дочерние узлы
+         * @private
+         * @param {number} nodeId ид узла
+         * @return {number[]} список id узлов
+         */
         , descendantChilds: function(nodeId) {
             var $childsElem = this.element.find(this.helpers.selectors.treeNode +"[data-parent-id='" + nodeId + "']");
             var childs = [];
@@ -94,15 +109,36 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             return childs;
             
         }
+        /**
+         * Проверим есть такой дочерний элемент
+         * @private
+         * @param {number} nodeId
+         * @param {number} childId
+         * @return {boolen}
+         */
         , descendantChildExists: function(nodeId, childId) {
             if (this.descendantChilds(nodeId).indexOf(parseInt(childId)) != -1) {
                 return true;
             }
             return false;
         }
+        /**
+         * Псевдоним для descendantChildExists
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , targetFolderIsChild: function(nodeId, parentId) {
             return this.descendantChildExists(nodeId, parentId);
         }
+        /**
+         * Проверим можно ли перенести папку. Используется при захвате папки для перемещения
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , checkDrop: function(nodeId, parentId) {
             if (nodeId == parentId) 
                 return false;
@@ -119,6 +155,13 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             }
             return true;
         }
+        /**
+         * Проверим можно ли перенести папку. Используется перед отправлением запроса на сервер
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , checkReplaceNode: function(nodeId, parentId) {
             if (nodeId == parentId) 
                 return false;
@@ -137,11 +180,25 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             }
             return true;
         }
+        /**
+         * Делаем запрос на сервер, если нужно
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , replaceNodeIfOnlyNeed: function(nodeId, parentId) {
             if (this.checkReplaceNode(nodeId, parentId)) {
                 this.replaceNode(nodeId, parentId); 
             }                
         }
+        /**
+         * Делаем запрос на сервер
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , replaceNode: function(nodeId, parentId) {
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
             var $branchImgElem = $targetFolderElem.find(this.helpers.selectors.treeNodeImgBranch);
@@ -165,6 +222,13 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
                 }
             });
         }
+        /**
+         * Перенесем DomElement
+         * @private
+         * @param {number} nodeId
+         * @param {number} parentId
+         * @return {boolen}
+         */
         , replaceNodeElem: function(nodeId, parentId) {
             var $targetFolderElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + parentId + "']");
             var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
