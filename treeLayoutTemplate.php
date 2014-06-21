@@ -8,16 +8,19 @@
         <script type="text/javascript" src="main.js"></script>
     </head>
     <body>
-        <table class="tree">
-        <?php
-        foreach ($tree as $node) {
-            include "branchTemplate.php";
-        }
-        ?>
-        </table>
+        <div class="tree-wrap">
+            <table class="tree">
+            <?php
+            foreach ($tree as $node) {
+                include "nodeTemplate.php";
+            }
+            ?>
+            </table>
+        </div>            
         <script>
         require(["Tree"], function(Tree) {
-            new Tree();
+            // new Tree();
+            $(".tree:first").tree();
         });
         </script>
     </body>

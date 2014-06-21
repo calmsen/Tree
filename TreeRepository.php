@@ -10,8 +10,9 @@ class TreeRepository {
         $stmt->setFetchMode(PDO::FETCH_CLASS, "TreeModel");
         return $stmt->fetchAll();
     }
-    public function replaceBranchOrLeaf($from, $to) {
-        
+    
+    public function updateTreeNode($node) {
+        $stmt = $this->dbh->query("UPDATE tree SET name = " . $node->id . ", parentId = " . $node->parentId . ";");
     }
 }
 

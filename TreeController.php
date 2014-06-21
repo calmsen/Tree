@@ -6,9 +6,17 @@ class TreeController {
         $this->service = $service;
     }
 
-    public function getTree($expandedBranchs) {
-        $tree = $this->service->getTree(0, $expandedBranchs);
+    public function getTree($expandedBranches) {
+        $tree = $this->service->getTree($expandedBranches);
         include "treeLayoutTemplate.php";
+    }
+    
+    public function replaceNode($nodeId, $parentId) {
+        if ((!isset($nodeId) && intval($nodeId) == 0) 
+                || (!isset($parentId) && intval($parentId) == 0) ) {
+            throw new BadRequestException("Не правильно переданы параметры.");
+        }
+        $tree = $this->service->getTree($expandedBranches);
     }
 }
 ?>

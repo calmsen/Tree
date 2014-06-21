@@ -1,2 +1,73 @@
+html, body {
+    padding: 0;
+    border: 0;
+    margin: 0;
+}
+.tree-wrap {
+    width: 100%;
+}
+.tree, .tree-node, .tree-node-inner {
+    padding: 0;
+    border: 0;
+    margin: 0;
+    overflow-y: hidden;
+}
+.tree {
+    border-collapse: separate;
+    margin: 0 auto;
+    width: 700px;
+}
 
+.tree-node-inner {
+    padding: 5px 10px 4px 6px;
+    height: 15px;
+    max-height: 15px;
+    overflow: hidden;
+}
+.tree-node-img {
+    display: block;
+    float: left;
+    width: 15px;
+    height: 15px;
+    margin-right: 2px;
+    
+}
+.tree-node-img-empty {
+    background: #ffffff;
+}
+.tree-node-img-arrow {
+    background: url(tree-node-img-arrows.png);
+}
+.tree-node-img-arrow-collapse {   
+    background-position: 0 -3px;    
+}
+.tree-node-img-arrow-expanded {
+    background-position: -19px -3px;    
+}
+.tree-node-img-branche-collapse {   
+    background: url("tree-node-img-branche-collapse.png");    
+}
+.tree-node-img-branche-expanded {   
+    background: url("tree-node-img-branche-expanded.png");    
+}
+.tree-node-img-loading {   
+    background: url("tree-node-img-loading.png");    
+}
+.tree-node-img-leaf {   
+    background: url("tree-node-img-leaf.png");    
+}
+.tree-node-img-drop-yes {   
+    background: url("tree-node-img-drop-yes.png");    
+}
+.tree-node-img-drop-no {   
+    background: url("tree-node-img-drop-no.png");    
+}
+.tree-node-name {
+    display: block;
+    height: 15px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 13px;
+    
+}
 
