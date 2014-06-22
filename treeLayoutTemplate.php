@@ -19,7 +19,9 @@
         </div>            
         <script>
         require(["Tree"], function(Tree) {
-            // new Tree();
+            // Вызываем конструктор как обычно
+            // new Tree({element: $(".tree:first")}); 
+            // Вызываем конструктор через jquery  плагин
             $(".tree:first").tree();
         });
         </script>
