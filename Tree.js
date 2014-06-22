@@ -14,12 +14,20 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             , helpers: {
                 selectors: {
                     treeNode: ".tree-node"
+                    , treeNodeBranch: ".tree-node-branch"
                     , treeNodeInner: ".tree-node-inner"
                     , treeNodeImgBranch: ".tree-node-img-branch"
+                    , treeNodeImgArrow: ".tree-node-img-arrow"
                     , treeNodeImgEmpty: ".tree-node-img-empty"
                 }
                 , classes: {
                     treeNodeImgLoading: "tree-node-img-loading"
+                    , treeNodeExpanded: "tree-node-expanded"
+                    , treeNodeImgBranchExpanded: "tree-node-img-branch-expanded"
+                    , treeNodeImgArrowExpanded: "tree-node-img-arrow-expanded"
+                    , treeNodeCollapse: "tree-node-collapse"
+                    , treeNodeImgBranchCollapse: "tree-node-img-branch-collapse"
+                    , treeNodeImgArrowCollapse: "tree-node-img-arrow-collapse"
                 }
                 , templates: {
                     treeNodeImgEmpty: "<span class=\"tree-node-img tree-node-img-empty\"></span>"
@@ -66,9 +74,13 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
                 })
                 .droppable({
                     drop: function() {
-                        treeObj.currentDraggedHelper.remove()
-                        treeObj.currentDraggedHelper = $();
-                        treeObj.replaceNodeIfOnlyNeed(treeObj.currentDraggedNodeId, treeObj.currentTargetNodeId);
+                        if (treeObj.checkReplaceNode(treeObj.currentDraggedNodeId, treeObj.currentTargetNodeId)) {
+                            treeObj.currentDraggedHelper.remove();
+                            treeObj.currentDraggedHelper = $();
+                            treeObj.replaceNode(treeObj.currentDraggedNodeId, treeObj.currentTargetNodeId);
+                        } else {
+                            treeObj.currentDraggedHelper = $();
+                        }                            
                     }
                 })
                 .on("mouseover", function(event) {
@@ -80,6 +92,9 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
                             treeObj.currentDraggedHelper.find(".tree-node-img").removeClass("tree-node-img-drop-yes").addClass("tree-node-img-drop-no");
                         }
                     }
+                })
+                .on("click", function(event) {
+                    treeObj.expandOrCollapse(this.getAttribute("data-id"));
                 });
             
             this.element
@@ -95,14 +110,17 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
          * @return {number[]} список id узлов
          */
         , descendantChilds: function(nodeId) {
-            var $childsElem = this.element.find(this.helpers.selectors.treeNode +"[data-parent-id='" + nodeId + "']");
+            var $childsElem = this.element.find(this.helpers.selectors.treeNode)
+                    .filter(function() {
+                        return $(this).data("parentId") == nodeId ? true : false
+                    });
             var childs = [];
             var treeObj = this;
             $childsElem.each(function() {
-                var $childElem = $(this);
-                var childId = $childElem.data("id");
-                childs.push(childId);
-                if ($childElem.data("type") == "branch") {
+                var childId = this.getAttribute("data-id");
+                childs.push(parseInt(childId));
+                
+                if (this.getAttribute("data-type") == "branch") {
                     childs = childs.concat(treeObj.descendantChilds(childId));
                 }
             });
@@ -181,18 +199,6 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             return true;
         }
         /**
-         * Делаем запрос на сервер, если нужно
-         * @private
-         * @param {number} nodeId
-         * @param {number} parentId
-         * @return {boolen}
-         */
-        , replaceNodeIfOnlyNeed: function(nodeId, parentId) {
-            if (this.checkReplaceNode(nodeId, parentId)) {
-                this.replaceNode(nodeId, parentId); 
-            }                
-        }
-        /**
          * Делаем запрос на сервер
          * @private
          * @param {number} nodeId
@@ -206,7 +212,7 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             
             $branchImgElem.addClass(this.helpers.classes.treeNodeImgLoading);
             
-            this.replaceNodeElem(nodeId, parentId);
+            this.replaceNodeElemAndChilds(nodeId, parentId);
             
             var treeObj = this;
             $.ajax({
@@ -247,6 +253,72 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             if (nodeType == "leaf") {
                 $nodeElem.prepend(this.helpers.templates.treeNodeImgEmpty);
             }
+        }
+        , replaceNodeElemAndChilds: function(nodeId, parentId) {
+            this.collapse(nodeId);
+            this.replaceNodeElem(nodeId, parentId);
+            var $childsElem = this.element.find(this.helpers.selectors.treeNode)
+                    .filter(function() {
+                        return $(this).data("parentId") == nodeId ? true : false
+                    });
+            var treeObj = this;
+            $childsElem.each(function() {
+                var childId = this.getAttribute("data-id");
+                if (this.getAttribute("data-type") == "branch") {
+                    treeObj.replaceNodeElem(childId, nodeId);
+                }
+            });
+        }
+        , expandOrCollapse: function(nodeId) {
+            var $nodeElem = this.element.find(this.helpers.selectors.treeNodeBranch +"[data-id='" + nodeId + "']");
+            if ($nodeElem.length == 0)
+                return;
+            if ($nodeElem.hasClass(this.helpers.classes.treeNodeExpanded)) {
+                this.collapse(nodeId);
+            } else {
+                this.expand(nodeId);
+            }
+        }
+        , collapse: function(nodeId) {
+            this.element.find(this.helpers.selectors.treeNodeBranch +"[data-id='" + nodeId + "']")
+                .removeClass(this.helpers.classes.treeNodeExpanded)
+                .addClass(this.helpers.classes.treeNodeCollapse)
+                .find(this.helpers.selectors.treeNodeImgBranch)
+                    .removeClass(this.helpers.classes.treeNodeImgBranchExpanded)
+                    .addClass(this.helpers.classes.treeNodeImgBranchCollapse)
+                .end()
+                .find(this.helpers.selectors.treeNodeImgArrow)
+                    .removeClass(this.helpers.classes.treeNodeImgArrowExpanded)
+                    .addClass(this.helpers.classes.treeNodeImgArrowCollapse);
+            var $childsElem = this.element.find(this.helpers.selectors.treeNode)
+                    .filter(function() {
+                        return $(this).data("parentId") == nodeId ? true : false
+                    });
+            var treeObj = this;
+            $childsElem.hide().each(function() {
+                var childId = this.getAttribute("data-id");
+                if (this.getAttribute("data-type") == "branch") {
+                    treeObj.collapse(childId);
+                }
+            });
+            
+        }
+        , expand: function(nodeId) {
+            this.element.find(this.helpers.selectors.treeNodeBranch +"[data-id='" + nodeId + "']")
+                .removeClass(this.helpers.classes.treeNodeCollapse)
+                .addClass(this.helpers.classes.treeNodeExpanded)
+                .find(this.helpers.selectors.treeNodeImgBranch)
+                    .removeClass(this.helpers.classes.treeNodeImgBranchCollapse)
+                    .addClass(this.helpers.classes.treeNodeImgBranchExpanded)
+                .end()
+                .find(this.helpers.selectors.treeNodeImgArrow)
+                    .removeClass(this.helpers.classes.treeNodeImgArrowCollapse)
+                    .addClass(this.helpers.classes.treeNodeImgArrowExpanded);
+            var $childsElem = this.element.find(this.helpers.selectors.treeNode)
+                .filter(function() {
+                    return $(this).data("parentId") == nodeId ? true : false
+                });
+            $childsElem.show();
         }
     });
     
