@@ -56,7 +56,7 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
          */
         , setTreeEvents: function() {
             var treeObj = this;
-            $(this.helpers.selectors.treeNode)
+            this.element.find(this.helpers.selectors.treeNode)
                 .draggable({
                     revert: true
                     , helper: function(event) {
@@ -213,7 +213,9 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             $branchImgElem.addClass(this.helpers.classes.treeNodeImgLoading);
             
             this.replaceNodeElemAndChilds(nodeId, parentId);
-            
+            $branchImgElem.removeClass(this.helpers.classes.treeNodeImgLoading);
+            $nodeElem.show();
+            return;
             var treeObj = this;
             $.ajax({
                 url: this.baseUrl + "replaceNode.php"
@@ -251,7 +253,7 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             
             var nodeType = $nodeElem.data("type");
             if (nodeType == "leaf") {
-                $nodeElem.prepend(this.helpers.templates.treeNodeImgEmpty);
+                $nodeInnerElem.prepend(this.helpers.templates.treeNodeImgEmpty);
             }
         }
         , replaceNodeElemAndChilds: function(nodeId, parentId) {
