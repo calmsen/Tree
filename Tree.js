@@ -213,9 +213,7 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
             $branchImgElem.addClass(this.helpers.classes.treeNodeImgLoading);
             
             this.replaceNodeElemAndChilds(nodeId, parentId);
-            $branchImgElem.removeClass(this.helpers.classes.treeNodeImgLoading);
-            $nodeElem.show();
-            return;
+            
             var treeObj = this;
             $.ajax({
                 url: this.baseUrl + "replaceNode.php"
@@ -259,17 +257,20 @@ define("Tree", ["jquery", "jqueryUi"], function($) {
         , replaceNodeElemAndChilds: function(nodeId, parentId) {
             this.collapse(nodeId);
             this.replaceNodeElem(nodeId, parentId);
-            var $childsElem = this.element.find(this.helpers.selectors.treeNode)
-                    .filter(function() {
-                        return $(this).data("parentId") == nodeId ? true : false
-                    });
-            var treeObj = this;
-            $childsElem.each(function() {
-                var childId = this.getAttribute("data-id");
-                if (this.getAttribute("data-type") == "branch") {
+            
+            var $nodeElem = this.element.find(this.helpers.selectors.treeNode +"[data-id='" + nodeId + "']");
+            
+            if ($nodeElem.data("type") == "branch") {
+                var $childsElem = this.element.find(this.helpers.selectors.treeNode)
+                        .filter(function() {
+                            return $(this).data("parentId") == nodeId ? true : false
+                        });
+                var treeObj = this;
+                $childsElem.each(function() {
+                    var childId = this.getAttribute("data-id");
                     treeObj.replaceNodeElem(childId, nodeId);
-                }
-            });
+                });
+            }                
         }
         , expandOrCollapse: function(nodeId) {
             var $nodeElem = this.element.find(this.helpers.selectors.treeNodeBranch +"[data-id='" + nodeId + "']");
